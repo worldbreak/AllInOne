@@ -1,0 +1,10 @@
+set terminal pdf
+set output 'vystup.pdf'
+set xrange [0:19]
+set yrange [0:600]
+set style data histogram
+set style histogram cluster gap 1
+set style fill solid border -1
+set boxwidth 0.9
+set xtic rotate by -45 scale 0
+plot 'cetnosti.txt' using 1
