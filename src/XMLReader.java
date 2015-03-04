@@ -141,6 +141,7 @@ public class XMLReader {
                 numberOfFiles++;
                 Document document = parse(f.getName());
                 casovaRada(document, fileNameOutput.replaceFirst("[.][^.]+$", "")+"_"+i+".pdf",i,0);
+            
 
         }
 
