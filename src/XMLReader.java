@@ -4,8 +4,10 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.util.Iterator;
 
 
@@ -19,13 +21,13 @@ public class XMLReader {
         return document;
     }
 
-    public static void bar(Document document, String fileNameOutput) throws DocumentException {
+    public static void cetnosti(Document document, String fileNameOutput,int actualFileNumber) throws DocumentException {
         int carsCount=0;
         int maximum=0;
         try {
-            FileWriter outFileFreq = new FileWriter("cetnosti.txt");
+            FileWriter outFileFreq = new FileWriter("cetnosti_"+actualFileNumber+".txt");
             PrintWriter outFreq = new PrintWriter(outFileFreq);
-            FileWriter outFileGNU = new FileWriter("gnuplot.txt");
+            FileWriter outFileGNU = new FileWriter("gnuplot_"+actualFileNumber+".txt");
             PrintWriter outGNU = new PrintWriter(outFileGNU);
 
             Element root = document.getRootElement();
@@ -62,7 +64,7 @@ public class XMLReader {
 
             outGNU.println("set terminal pdf");
             outGNU.println("set output '"+fileNameOutput+"'");
-            outGNU.println("set xrange [0:19]");
+            outGNU.println("set xrange [0:"+ Array.getLength(cetnosti)+"]");
             outGNU.println("set yrange [0:600]");
             outGNU.println("set style data histogram");
             outGNU.println("set style histogram cluster gap 1");
@@ -80,8 +82,70 @@ public class XMLReader {
 
     }
 
+
+
+
+    public static void casovaRada(Document document, String fileNameOutput,int actualFileNumber, int numberOfFiles) throws DocumentException {
+        int carsCount=0;
+        int time=0;
+        try {
+            String FileNameTime = "cas_"+actualFileNumber+".txt";;
+            FileWriter outFileTime = new FileWriter(FileNameTime);
+            PrintWriter outTime = new PrintWriter(outFileTime);
+            FileWriter outFileGNU = new FileWriter("gnuplot_"+actualFileNumber+".txt");
+            PrintWriter outGNU = new PrintWriter(outFileGNU);
+
+            Element root = document.getRootElement();
+
+            // iterate through child elements of root with element name "foo"
+            for ( Iterator i = root.elementIterator( "interval" ); i.hasNext(); ) {
+                outTime.print(time+"    ");
+                Element foo = (Element) i.next();
+                for ( Iterator j = foo.attributeIterator(); j.hasNext(); ) {
+                    Attribute attribute = (Attribute) j.next();
+                    String name = attribute.getName();
+                    if (name.equals("nVehContrib")) {
+                        double pomoc = Double.valueOf(attribute.getValue());
+                        outTime.println(pomoc);
+                        System.out.println(time+"   "+pomoc);
+                    }
+                }
+            time++;
+            }
+            outGNU.println("set terminal pdf");
+            outGNU.println("set output '"+fileNameOutput+"'");
+            outGNU.println("set xrange [0:1440]");
+            outGNU.println("set yrange [0:60]");
+          /*  outGNU.println("set style data histogram");
+            outGNU.println("set style histogram cluster gap 1");
+            outGNU.println("set style fill solid border -1");
+            outGNU.println("set boxwidth 0.9");
+            outGNU.println("set xtic rotate by -45 scale 0");*/
+            outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines");
+            outGNU.close();
+            outFileTime.close();
+
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
     public XMLReader(String fileNameInput, String fileNameOutput) throws DocumentException {
-           Document document = parse(fileNameInput);
-           bar(document, fileNameOutput);
+        int numberOfFiles=0;
+        for (int i=0; i<3;i++)
+        {
+            File f = new File(fileNameInput.replaceFirst("[.][^.]+$", "")+"_"+i+".xml");
+            if (f.exists())
+                numberOfFiles++;
+                Document document = parse(f.getName());
+                casovaRada(document, fileNameOutput.replaceFirst("[.][^.]+$", "")+"_"+i+".pdf",i,0);
+
+        }
+
+
+/*           Document document = parse(fileNameInput);
+           bar(document, fileNameOutput);*/
     }
 }

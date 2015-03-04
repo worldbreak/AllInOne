@@ -71,11 +71,20 @@ public class XMLCreator {
             double countlane1 = matlabImport.getNumCars(i, 1);
             double delta0,delta1;
             PoissonDistribution lane0=null,lane1=null;
+
             if (poisson) {
-                lane0 = new PoissonDistribution(countlane0 / secPerHour);
-                lane1 = new PoissonDistribution(countlane1 / secPerHour);
-                delta0 = lane0.sample();
-                delta1 = lane1.sample();
+                if (countlane0 == 0) {
+                    delta0 = secPerHour+1;
+                } else {
+                    lane0 = new PoissonDistribution(secPerHour/countlane0);
+                    delta0 = lane0.sample();
+                }
+                if (countlane1 == 0) {
+                    delta1 = secPerHour+1;
+                } else {
+                    lane1 = new PoissonDistribution(secPerHour/countlane1);
+                    delta1 = lane1.sample();
+                }
             } else {
                 if (countlane0 == 0) {
                     delta0 = secPerHour+1;
@@ -87,6 +96,8 @@ public class XMLCreator {
                 } else {
                     delta1 = (secPerHour / countlane1);
                 }
+
+
             }
             time0 = time0 + delta0;
             time1 = time1 + delta1;
@@ -110,7 +121,11 @@ public class XMLCreator {
                 } else if (time0 < time1) {
                     vehicle = createVehicle(vehicle, actualCar, time0, i, 0);
                     if (poisson) {
-                        time0 = time0 + lane0.sample();
+                        int cislo;
+                        do{
+                            cislo = lane0.sample();
+                        } while (time0 + cislo>59);
+                        time0 = time0 + cislo;
                     } else {
                         time0 = time0 + delta0;
                     }
@@ -118,7 +133,11 @@ public class XMLCreator {
                 } else {
                     vehicle = createVehicle(vehicle, actualCar, time1, i, 1);
                     if (poisson) {
-                        time1 = time1 + lane1.sample();
+                        int cislo;
+                        do{
+                            cislo = lane1.sample();
+                        } while (time1 + cislo>59);
+                        time1 = time1 + cislo;
                     } else {
                         time1 = time1 + delta1;
                     }
