@@ -1,0 +1,6 @@
+set terminal pdf
+set output 'hist.pdf'
+set xrange [0:52]
+set yrange [0:77.0]
+set style fill transparent solid 0.5 noborder
+plot 'cetnosti.txt' u 1:2 w boxes lc rgb"green" notitle

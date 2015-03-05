@@ -1,5 +1,5 @@
 set terminal pdf
-set output 'obrazek_1.pdf
+set output 'hist_1.pdf
 set xrange [0:1440]
 set yrange [0:60]
 plot 'pocetvozidelpruh_1.txt' using 1:2 with lines

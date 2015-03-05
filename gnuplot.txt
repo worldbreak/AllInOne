@@ -1,5 +1,5 @@
 set terminal pdf
-set output 'obrazek.pdf
+set output 'hist.pdf
 set xdata time
 set timefmt '%H:%M'
 set format x '%H:%M'

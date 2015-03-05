@@ -8,6 +8,21 @@ import java.util.Arrays;
  */
 public class AllInOne {
 
+    public static boolean isInteger(String s) {
+        return isInteger(s,10);
+    }
+
+    public static boolean isInteger(String s, int radix) {
+        if(s.isEmpty()) return false;
+        for(int i = 0; i < s.length(); i++) {
+            if(i == 0 && s.charAt(i) == '-') {
+                if(s.length() == 1) return false;
+                else continue;
+            }
+            if(Character.digit(s.charAt(i),radix) < 0) return false;
+        }
+        return true;
+    }
 
     public AllInOne(String args[]) {
         int i = 0;
@@ -75,6 +90,36 @@ public class AllInOne {
                         if (args[i+2].endsWith(".pdf")){
                             try {
                                 new XMLReader(args[i+1],args[i+2]);
+                            } catch (DocumentException e) {
+                                System.out.println(e);
+                            }
+                        }else{
+                            System.out.println("Musíte zadat název výstupního souboru (přípona .pdf)");
+                        }
+                    }else{
+                        System.out.println("Nejprve zadejte název souboru s detektorem (.xml)");
+                    }
+
+                }else{
+                    System.out.println("Zadejte argumenty -x");
+                }
+
+            }
+
+            if (arg.equals("-xh")) {
+                if(Array.getLength(args)>(i+2)) {
+                    if (args[i+1].endsWith(".xml")) {
+                        if (args[i+2].endsWith(".pdf")){
+                            try {
+                                if(Array.getLength(args)>(i+3))
+                                {
+                                    if (isInteger(args[i + 3]))
+                                        new XMLReaderHist(args[i + 1], args[i + 2], args[i + 3]);
+                                    else
+                                        new XMLReaderHist(args[i+1],args[i+2],"-1");
+                                }
+                                else
+                                    new XMLReaderHist(args[i+1],args[i+2],"-1");
                             } catch (DocumentException e) {
                                 System.out.println(e);
                             }
