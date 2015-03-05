@@ -25,7 +25,9 @@ public class AllInOne {
         druhy argument - nazev souboru s vozidly
 
         -x rozdělení a práce s XML
-        prvni argument XML soubor (je potřeba rozšířit)
+        prvni argument XML soubor (bez _0)
+        druhý argument výstupní soubor
+        po vygenerování je potřeba spustit gnuplot.txt
 
     */
 
@@ -89,6 +91,27 @@ public class AllInOne {
 
             }
 
+            if (arg.equals("-h")) {
+                if(Array.getLength(args)>(i+2)) {
+                    if (args[i+1].endsWith(".xml")) {
+                        if (args[i+2].endsWith(".pdf")){
+                            try {
+                                new Histogram(args[i+1],args[i+2]);
+                            } catch (DocumentException e) {
+                                System.out.println(e);
+                            }
+                        }else{
+                            System.out.println("Musíte zadat název výstupního souboru (přípona .pdf)");
+                        }
+                    }else{
+                        System.out.println("Nejprve zadejte název souboru s detektorem (.xml)");
+                    }
+
+                }else{
+                    System.out.println("Zadejte argumenty -x");
+                }
+
+            }
 
             i++;
         }
