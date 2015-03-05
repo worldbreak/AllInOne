@@ -9,10 +9,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.*;
 
 
 public class Histogram {
@@ -23,6 +20,16 @@ public class Histogram {
         SAXReader reader = new SAXReader();
         Document document = reader.read(fileName);
         return document;
+    }
+
+
+    public static double max(double[] values) {
+        double max = Double.MIN_VALUE;
+        for(double value : values) {
+            if(value > max)
+                max = value;
+        }
+        return max;
     }
 
     public static void cetnosti(Document document, String fileNameOutput,int actualFileNumber) throws DocumentException {
@@ -97,9 +104,9 @@ public class Histogram {
 
 
     public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles) throws DocumentException {
-        int carsCount=0;
         Document[] documents = new Document[numberOfFiles];
         double[][] numCars = new double[numberOfFiles][1440];
+        double[] sumCars = new double[1440];
         try {
             for (int h=0;h<numberOfFiles;h++) {
                 File f = new File(fileNameInput.replaceFirst("[.][^.]+$", "") + "_" + h + ".xml");
@@ -120,48 +127,48 @@ public class Histogram {
                 }
             }
 
-            String FileNameTime = "pocetvozidelpruh.txt";
-            FileWriter outFileTime = new FileWriter(FileNameTime);
-            PrintWriter outFile = new PrintWriter(outFileTime);
-            double[] sum = new double[1440];
-            Calendar now = Calendar.getInstance();
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 
-            now = setStart(now);
-            for(int lane=0;lane<numCars[0].length;lane++)
-            {
-
-                outFile.print(sdf.format(now.getTime())+"    ");
-                for (int f=0;f<numberOfFiles;f++)
+            for (int minute=0;minute<1440;minute++)
+                for (int h=0;h<numberOfFiles;h++) {
                 {
-                    sum[lane] = sum[lane]+numCars[f][lane];
-                    outFile.print(numCars[f][lane]+"    ");
+                    sumCars[minute] += numCars[h][minute];
                 }
-                outFile.print(sum[lane]+"   ");
-                outFile.println();
-                now.add(Calendar.MINUTE, 1);
+
             }
 
-            outFile.close();
+            double max = max(sumCars);
+            double[] freq = new double[(int)max+1];
+            for (int i=0;i<Array.getLength(sumCars);i++){
+                freq[(int)sumCars[i]]++;
+            }
 
-            FileWriter outFileGNU = new FileWriter("gnuplot.txt");
+            FileWriter outFileFreq = new FileWriter("cetnosti.txt");
+            PrintWriter outFreq = new PrintWriter(outFileFreq);
+
+            for (int i=0;i<Array.getLength(freq);i++)
+                outFreq.println(i+"    "+freq[i]);
+
+            outFreq.close();
+
+            FileWriter outFileGNU = new FileWriter("gnuPlotCetnosti.txt");
             PrintWriter outGNU = new PrintWriter(outFileGNU);
 
+
+
             outGNU.println("set terminal pdf");
-            outGNU.println("set output '"+fileNameOutput);
-            outGNU.println("set xdata time");
-            outGNU.println("set timefmt '%H:%M'");
-            outGNU.println("set format x '%H:%M'");
-            outGNU.println("set yrange [0:60]");
-            outGNU.print("plot ");
-            for (int c=0;c<=numberOfFiles;c++) {
+            outGNU.println("set output '"+fileNameOutput+"'");
+            outGNU.println("set xrange [0:"+Array.getLength(freq)+"]");
+            outGNU.println("set yrange [0:"+max(freq)+"]");
+            outGNU.println("set style fill transparent solid 0.5 noborder");
+            outGNU.print("plot 'cetnosti.txt' u 1:2 w boxes lc rgb\"green\" notitle");
+         /*   for (int c=0;c<=numberOfFiles;c++) {
                 int column = c + 2;
                 int lane = c + 1;
-                if (c!=numberOfFiles)
-                    outGNU.print("'" + FileNameTime + "' using 1:" + column +" with lines title 'pruh"+c+"', ");
+               if (c!=numberOfFiles)
+                    outGNU.print("'" + fileNameOutput + "' using 1:" + column +" with lines title 'pruh"+c+"', ");
                 else
-                    outGNU.println("'" + FileNameTime + "' using 1:" + column +" with lines title 'součet'");
-            }
+                    outGNU.println("'" + fileNameOutput + "' using 1:" + column +" with lines title 'součet'");
+            } */
       //      outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines, '"+FileNameTime+"' using 1:3 with lines, '"+FileNameTime+"'using 1:4 with lines, '"+FileNameTime+"' using 1:5 with lines");
             outGNU.close();
         } catch (Exception e) {
