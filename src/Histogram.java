@@ -157,20 +157,14 @@ public class Histogram {
 
             outGNU.println("set terminal pdf");
             outGNU.println("set output '"+fileNameOutput+"'");
+            outGNU.println("set ylabel 'Četnost'");
+            outGNU.println("set xlabel 'Počet vozidel'");
             outGNU.println("set xrange [0:"+Array.getLength(freq)+"]");
             outGNU.println("set yrange [0:"+max(freq)+"]");
             outGNU.println("set style fill transparent solid 0.5 noborder");
             outGNU.print("plot 'cetnosti.txt' u 1:2 w boxes lc rgb\"green\" notitle");
-         /*   for (int c=0;c<=numberOfFiles;c++) {
-                int column = c + 2;
-                int lane = c + 1;
-               if (c!=numberOfFiles)
-                    outGNU.print("'" + fileNameOutput + "' using 1:" + column +" with lines title 'pruh"+c+"', ");
-                else
-                    outGNU.println("'" + fileNameOutput + "' using 1:" + column +" with lines title 'součet'");
-            } */
-      //      outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines, '"+FileNameTime+"' using 1:3 with lines, '"+FileNameTime+"'using 1:4 with lines, '"+FileNameTime+"' using 1:5 with lines");
             outGNU.close();
+
         } catch (Exception e) {
             System.out.println(e);
         }

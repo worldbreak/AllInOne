@@ -44,6 +44,11 @@ public class AllInOne {
         druhý argument výstupní soubor
         po vygenerování je potřeba spustit gnuplot.txt
 
+        -h
+        histogram
+        prvni argument XML soubor (bez _0)
+        druhý argument výstupní soubor
+        po vygenerování je potřeba spustit gnuplotcetnosti.txt
     */
 
         while (i < args.length) {

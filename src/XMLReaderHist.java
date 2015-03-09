@@ -25,6 +25,15 @@ public class XMLReaderHist {
         return document;
     }
 
+    public static double max(double[] values) {
+        double max = Double.MIN_VALUE;
+        for(double value : values) {
+            if(value > max)
+                max = value;
+        }
+        return max;
+    }
+
     public static void cetnosti(Document document, String fileNameOutput,int actualFileNumber) throws DocumentException {
         int carsCount=0;
         int maximum=0;
@@ -114,61 +123,34 @@ public class XMLReaderHist {
 
         try {
             for (int h=0;h<numberOfFiles;h++) {
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-                Calendar now = Calendar.getInstance();
-                now = setStart(now);
-                File f = new File(fileNameInput.replaceFirst("[.][^.]+$", "") + "_" + h + ".xml");
+               File f = new File(fileNameInput.replaceFirst("[.][^.]+$", "") + "_" + h + ".xml");
                 documents[h] = parse(f.getName());
-                String FileNameTime = "pocetvozidelpruh_"+h+".txt";
-                FileWriter outFileTime = new FileWriter(FileNameTime);
-                PrintWriter outTime = new PrintWriter(outFileTime);
-                FileWriter outFileGNU = new FileWriter("gnuplot_"+h+".txt");
-                PrintWriter outGNU = new PrintWriter(outFileGNU);
                 Element root = documents[h].getRootElement();
                 int loop = 0;
                 for ( Iterator i = root.elementIterator( "interval" ); i.hasNext(); ) {
-                    outTime.print(sdf.format(now.getTime())+"    ");
                     Element foo = (Element) i.next();
                     for ( Iterator j = foo.attributeIterator(); j.hasNext(); ) {
                         Attribute attribute = (Attribute) j.next();
                         String name = attribute.getName();
                         if (name.equals("nVehContrib")) {
-                            if (loop==1439)
-                                System.out.println();
                             double pomoc = Double.valueOf(attribute.getValue());
-                            outTime.println(pomoc);
                             int index = (int) loop / increaser;
                             numCars[h][index] = numCars[h][index] + pomoc;
-                            System.out.println(loop);
-                            System.out.println(index);
                             loop++;
                         }
                     }
-                    now.add(Calendar.MINUTE, increaser);
                 }
-                outGNU.println("set terminal pdf");
-                outGNU.println("set output '"+fileNameOutput.replaceFirst("[.][^.]+$", "") + "_" + h + ".pdf");
-                outGNU.println("set xrange [0:1440]");
-                outGNU.println("set yrange [0:60]");
-          /*  outGNU.println("set style data histogram");
-            outGNU.println("set style histogram cluster gap 1");
-            outGNU.println("set style fill solid border -1");
-            outGNU.println("set boxwidth 0.9");
-            outGNU.println("set xtic rotate by -45 scale 0");*/
-                outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines");
-                outGNU.close();
-                outFileTime.close();
             }
 
-            String FileNameTime = "pocetvozidelpruh.txt";
+            String FileNameTime = "pocetvozidelhist.txt";
             FileWriter outFileTime = new FileWriter(FileNameTime);
             PrintWriter outFile = new PrintWriter(outFileTime);
-            double[] sum = new double[1440];
+            double[] sum = new double[sizeOfArray];
             Calendar now = Calendar.getInstance();
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 
             now = setStart(now);
-            for(int lane=0;lane<numCars[0].length;lane++)
+            for(int lane=0;lane<sizeOfArray;lane++)
             {
 
                 outFile.print(sdf.format(now.getTime())+"    ");
@@ -179,7 +161,7 @@ public class XMLReaderHist {
                 }
                 outFile.print(sum[lane]+"   ");
                 outFile.println();
-                now.add(Calendar.MINUTE, 1);
+                now.add(Calendar.MINUTE, increaser);
             }
 
             outFile.close();
@@ -188,20 +170,33 @@ public class XMLReaderHist {
             PrintWriter outGNU = new PrintWriter(outFileGNU);
 
             outGNU.println("set terminal pdf");
-            outGNU.println("set output '"+fileNameOutput);
-            outGNU.println("set xdata time");
-            outGNU.println("set timefmt '%H:%M'");
-            outGNU.println("set format x '%H:%M'");
-            outGNU.println("set yrange [0:60]");
-            outGNU.print("plot ");
-            for (int c=0;c<=numberOfFiles;c++) {
+            outGNU.println("set output '"+fileNameOutput+"'");
+        //    outGNU.println("set xdata time");
+        //    outGNU.println("set timefmt '%H:%M:%S'");
+        //    outGNU.println("set format x '%H:%M:%S'");
+         //   outGNU.println("set boxwidth 0.75 absolute");
+            outGNU.println("set style fill solid 1.00 border -1");
+            outGNU.println("set style histogram rowstacked");
+            outGNU.println("set style data histograms");
+         //   outGNU.println("set xtics rotate by 90 offset 0,-5 out nomirror");
+            outGNU.println("set ytics out nomirror");
+            outGNU.println("set style fill solid border -1");
+            outGNU.println("set boxwidth 0.5 relative");
+
+          //  outGNU.println("set xrange ['00:00':'23:45']");
+           // outGNU.println("set xrange [0:"+sizeOfArray+"]");
+           // outGNU.println("set yrange [0:"+max(sum)+"]");
+            outGNU.println("set style fill transparent solid 0.5 noborder");
+            outGNU.print("plot 'pocetvozidelhist.txt' using 2:xtic(strcol(1)) lc rgb 'green',  'pocetvozidelhist.txt' using 3 lc rgb 'red', 'pocetvozidelhist.txt' using 4 lc rgb 'yellow'");
+            //using 2:xticlabels(1) lc rgb 'green'
+       /*     for (int c=0;c<=numberOfFiles;c++) {
                 int column = c + 2;
                 int lane = c + 1;
                 if (c!=numberOfFiles)
                     outGNU.print("'" + FileNameTime + "' using 1:" + column +" with lines title 'pruh"+c+"', ");
                 else
                     outGNU.println("'" + FileNameTime + "' using 1:" + column +" with lines title 'součet'");
-            }
+            } */
       //      outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines, '"+FileNameTime+"' using 1:3 with lines, '"+FileNameTime+"'using 1:4 with lines, '"+FileNameTime+"' using 1:5 with lines");
             outGNU.close();
         } catch (Exception e) {
