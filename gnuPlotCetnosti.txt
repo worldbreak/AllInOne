@@ -1,5 +1,5 @@
 set terminal pdf
-set output 'hist-orig.pdf'
+set output 'casovarada.pdf'
 set ylabel 'Èetnost'
 set xlabel 'Poèet vozidel'
 set xrange [0:63]

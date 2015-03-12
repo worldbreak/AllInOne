@@ -34,12 +34,13 @@ public class AllInOne {
         -c - createVehicles
         prvni argument - nazev souboru s branou
         druhy argument - nazev souboru s vozidly
+        treti (nepovinny argument) - typ generovani vozidel - exp - exponenciální; default - deterministický
 
         -m matlabToXml - Xml bude mít stejný tvar jako výstupní soubor z detektoru
         prvni argument - nazev souboru s branou
         druhy argument - nazev souboru s vozidly
 
-        -x rozdělení a práce s XML
+        -x rozdělení a práce s XML - časová řada
         prvni argument XML soubor (bez _0)
         druhý argument výstupní soubor
         po vygenerování je potřeba spustit gnuplot.txt
@@ -58,7 +59,18 @@ public class AllInOne {
                 if(Array.getLength(args)>(i+2)){
                     if (args[i+1].endsWith(".mat")){
                         if (args[i+2].endsWith(".rou.xml")){
-                            new XMLCreator(args[i+1],args[i+2]);
+                            if(Array.getLength(args)>(i+3))
+                            {
+                                if ((args[i + 3]).equals("exp"))
+                                    new XMLCreator(args[i+1],args[i+2],args[i+3]);
+                                else
+                                    new XMLCreator(args[i+1],args[i+2],"det");
+                            }
+                            else
+                            {
+                                new XMLCreator(args[i+1],args[i+2],"det");
+                            }
+
                         }else{
                             System.out.println("Musíte zadat název výstupního souboru (přípona .rou.xml)");
                         }
@@ -93,9 +105,11 @@ public class AllInOne {
                 if(Array.getLength(args)>(i+2)) {
                     if (args[i+1].endsWith(".xml")) {
                         if (args[i+2].endsWith(".pdf")){
-                            try {
+                            try
+                            {
                                 new XMLReader(args[i+1],args[i+2]);
-                            } catch (DocumentException e) {
+                            } catch (DocumentException e)
+                            {
                                 System.out.println(e);
                             }
                         }else{

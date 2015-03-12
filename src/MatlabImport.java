@@ -119,7 +119,7 @@ public class MatlabImport {
 
  public int getAllCarsInDay(){
   int allcars=0;
-    for (int i=0;i<2;i++){
+    for (int i=0;i<getNumLanes();i++){
         for (int j=0;j<1440;j++) {
            allcars+= (int) countcars[j][i];
 

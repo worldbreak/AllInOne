@@ -171,23 +171,27 @@ public class XMLReaderHist {
 
             outGNU.println("set terminal pdf");
             outGNU.println("set output '"+fileNameOutput+"'");
-        //    outGNU.println("set xdata time");
-        //    outGNU.println("set timefmt '%H:%M:%S'");
-        //    outGNU.println("set format x '%H:%M:%S'");
-         //   outGNU.println("set boxwidth 0.75 absolute");
+
             outGNU.println("set style fill solid 1.00 border -1");
             outGNU.println("set style histogram rowstacked");
             outGNU.println("set style data histograms");
-         //   outGNU.println("set xtics rotate by 90 offset 0,-5 out nomirror");
+
             outGNU.println("set ytics out nomirror");
             outGNU.println("set style fill solid border -1");
             outGNU.println("set boxwidth 0.5 relative");
-
-          //  outGNU.println("set xrange ['00:00':'23:45']");
-           // outGNU.println("set xrange [0:"+sizeOfArray+"]");
-           // outGNU.println("set yrange [0:"+max(sum)+"]");
+            outGNU.println("set ylabel 'Počet vozidel'");
+            outGNU.println("set xlabel 'Čas'");
             outGNU.println("set style fill transparent solid 0.5 noborder");
-            outGNU.print("plot 'pocetvozidelhist.txt' using 2:xtic(strcol(1)) lc rgb 'green',  'pocetvozidelhist.txt' using 3 lc rgb 'red', 'pocetvozidelhist.txt' using 4 lc rgb 'yellow'");
+            outGNU.print("plot 'pocetvozidelhist.txt' using 2:xtic(strcol(1)) title 'počet vozidel - 0. pruh', ");
+
+            for (int c=1;c<numberOfFiles;c++) {
+                int column=c+3;
+                if (c!=numberOfFiles)
+                    outGNU.print("'" + FileNameTime + "' using " + column +" title 'počet vozidel - "+c+". pruh', ");
+                else
+                    outGNU.println("'" + FileNameTime + "' using " + column +" title 'počet vozidel - "+c+". pruh'");
+            }
+         //   outGNU.print("plot 'pocetvozidelhist.txt' using 2:xtic(strcol(1)) lc rgb 'green',  'pocetvozidelhist.txt' using 3 lc rgb 'red', 'pocetvozidelhist.txt' using 4 lc rgb 'yellow'");
             //using 2:xticlabels(1) lc rgb 'green'
        /*     for (int c=0;c<=numberOfFiles;c++) {
                 int column = c + 2;

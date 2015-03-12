@@ -23,20 +23,6 @@ public class MatlabToXML {
     int period = 60;
     MatlabImport matlabImport;// = new MatlabImport(km,day,month,year);
 
-    public static int getPoisson(double lambda) {
-        double L = Math.exp(-lambda);
-        double p = 1.0;
-        int k = 0;
-
-        do {
-            k++;
-            p *= Math.random();
-        } while (p > L);
-
-        return k - 1;
-    }
-
-
     public Document createLoopDocument(int lane) {
         Document document = DocumentHelper.createDocument();
         Element detector = document.addElement("detector");
