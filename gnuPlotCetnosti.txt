@@ -1,8 +1,8 @@
 set terminal pdf
-set output 'casovarada.pdf'
+set output 'histogramdetektor-69.pdf'
 set ylabel 'Èetnost'
 set xlabel 'Poèet vozidel'
-set xrange [0:63]
-set yrange [0:91.0]
+set xrange [0:57]
+set yrange [0:11.0]
 set style fill transparent solid 0.5 noborder
 plot 'cetnosti.txt' u 1:2 w boxes lc rgb"green" notitle

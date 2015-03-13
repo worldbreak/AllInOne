@@ -32,10 +32,30 @@ public class Histogram {
         return max;
     }
 
-    public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles) throws DocumentException {
+    private static int toMins(String s) {
+        String[] hourMin = s.split(":");
+        int hour = Integer.parseInt(hourMin[0]);
+        int mins = Integer.parseInt(hourMin[1]);
+        int hoursInMins = hour * 60;
+        return hoursInMins + mins;
+    }
+
+    public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles,String from, String to) throws DocumentException {
         Document[] documents = new Document[numberOfFiles];
+        int fromInt = toMins(from);
+        int toInt = toMins(to);
+        int sizeOfArray = 1440;
+        if (to!="-1")
+        {
+            if (fromInt<toInt)
+                sizeOfArray = toInt - fromInt;
+            else
+                sizeOfArray = 1440-fromInt + toInt;
+        }
+
         double[][] numCars = new double[numberOfFiles][1440];
         double[] sumCars = new double[1440];
+
         try {
             for (int h=0;h<numberOfFiles;h++) {
                 File f = new File(fileNameInput.replaceFirst("[.][^.]+$", "") + "_" + h + ".xml");
@@ -56,21 +76,72 @@ public class Histogram {
                 }
             }
 
-
-            for (int minute=0;minute<1440;minute++)
-                for (int h=0;h<numberOfFiles;h++) {
+            if (to=="-1")
+            {
+                for (int minute=0;minute<sizeOfArray;minute++)
                 {
-                    sumCars[minute] += numCars[h][minute];
+                    for (int h=0;h<numberOfFiles;h++)
+                    {
+                        sumCars[minute] += numCars[h][minute];
+                    }
                 }
+            }
+            else
+            {
+                if (fromInt < toInt)
+                for (int minute=fromInt;minute<toInt;minute++)
+                {
+                    for (int h=0;h<numberOfFiles;h++)
+                    {
+                        sumCars[minute] += numCars[h][minute];
+                    }
+                }
+                else
+                {
+                    for (int minute=fromInt;minute<1440;minute++)
+                    {
+                        for (int h=0;h<numberOfFiles;h++)
+                        {
+                            sumCars[minute] += numCars[h][minute];
+                        }
+                    }
+                    for (int minute=0;minute<toInt;minute++)
+                    {
+                        for (int h=0;h<numberOfFiles;h++)
+                        {
+                            sumCars[minute] += numCars[h][minute];
+                        }
+                    }
+                }
+
 
             }
 
             double max = max(sumCars);
             double[] freq = new double[(int)max+1];
-            for (int i=0;i<Array.getLength(sumCars);i++){
-                freq[(int)sumCars[i]]++;
-            }
 
+            if (to=="-1")
+            {
+               for (int i=0;i<Array.getLength(sumCars);i++)
+               {
+                   freq[(int)sumCars[i]]++;
+               }
+            }
+            else
+            {
+                if (fromInt < toInt)
+                {
+                    for (int i=fromInt;i<toInt;i++)
+                        freq[(int)sumCars[i]]++;
+                }
+                else
+                {
+                    for (int i=fromInt;i<1440;i++)
+                        freq[(int)sumCars[i]]++;
+                    for (int i=0;i<toInt;i++)
+                        freq[(int)sumCars[i]]++;
+                }
+            }
             FileWriter outFileFreq = new FileWriter("cetnosti.txt");
             PrintWriter outFreq = new PrintWriter(outFileFreq);
 
@@ -100,7 +171,7 @@ public class Histogram {
 
     }
 
-    public Histogram(String fileNameInput, String fileNameOutput) throws DocumentException {
+    public Histogram(String fileNameInput, String fileNameOutput,String from, String to) throws DocumentException {
         int numberOfFiles=0;
         for (int i=0; i<4;i++)
         {
@@ -108,7 +179,7 @@ public class Histogram {
             if (f.exists())
                 numberOfFiles++;
         }
-        hist(fileNameInput,fileNameOutput,numberOfFiles);
+        hist(fileNameInput,fileNameOutput,numberOfFiles,from,to);
 
 /*           Document document = parse(fileNameInput);
            bar(document, fileNameOutput);*/

@@ -160,7 +160,12 @@ public class AllInOne {
                     if (args[i+1].endsWith(".xml")) {
                         if (args[i+2].endsWith(".pdf")){
                             try {
-                                new Histogram(args[i+1],args[i+2]);
+                                if(Array.getLength(args)>(i+4))
+                                {
+                                    new Histogram(args[i+1],args[i+2],args[i+3],args[i+4]);
+                                }
+                                else
+                                    new Histogram(args[i+1],args[i+2],"-1","-1");
                             } catch (DocumentException e) {
                                 System.out.println(e);
                             }
