@@ -33,6 +33,7 @@ public class Histogram {
     }
 
     private static int toMins(String s) {
+        if (s.equals("-1")) return -1;
         String[] hourMin = s.split(":");
         int hour = Integer.parseInt(hourMin[0]);
         int mins = Integer.parseInt(hourMin[1]);

@@ -35,7 +35,7 @@ public class XMLReader {
     }
 
 
-    public static void casovaRada(String fileNameInput,String fileNameOutput,int numberOfFiles) throws DocumentException {
+    public static void timeSeries(String fileNameInput,String fileNameOutput,int numberOfFiles) throws DocumentException {
         int carsCount=0;
         Document[] documents = new Document[numberOfFiles];
         double[][] numCars = new double[numberOfFiles][1440];
@@ -143,7 +143,7 @@ public class XMLReader {
             if (f.exists())
                 numberOfFiles++;
         }
-        casovaRada(fileNameInput,fileNameOutput,numberOfFiles);
+        timeSeries(fileNameInput,fileNameOutput,numberOfFiles);
 
 /*           Document document = parse(fileNameInput);
            bar(document, fileNameOutput);*/
