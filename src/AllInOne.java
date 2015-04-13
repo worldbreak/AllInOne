@@ -1,7 +1,6 @@
 import org.dom4j.DocumentException;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 
 /**
  * Created by sumo on 17.2.2015.
@@ -62,13 +61,22 @@ public class AllInOne {
                             if(Array.getLength(args)>(i+3))
                             {
                                 if ((args[i + 3]).equals("exp"))
-                                    new XMLCreator(args[i+1],args[i+2],args[i+3]);
-                                else
-                                    new XMLCreator(args[i+1],args[i+2],"det");
+                                    new XMLCreator(args[i+1],args[i+2],"Krauss",args[i+3]);
+                                else {
+                                    if(Array.getLength(args)>(i+4)) {
+                                        if ((args[i + 4]).equals("exp"))
+                                            new XMLCreator(args[i + 1], args[i + 2], args[i + 3], "exp");
+                                        else
+                                            new XMLCreator(args[i + 1], args[i + 2], args[i + 3], args[i + 4]);
+                                    }
+                                    else
+                                        new XMLCreator(args[i + 1], args[i + 2], args[i + 3], "det");
+                                }
+
                             }
                             else
                             {
-                                new XMLCreator(args[i+1],args[i+2],"det");
+                                new XMLCreator(args[i+1],args[i+2],"Krauss","det");
                             }
 
                         }else{

@@ -8,8 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Iterator;
 
 
 public class Histogram {

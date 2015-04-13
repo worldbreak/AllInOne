@@ -1,5 +1,5 @@
 import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -8,7 +8,6 @@ import org.dom4j.io.XMLWriter;
 
 import java.io.FileWriter;
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -21,9 +20,7 @@ public class XMLCreator {
     final int secPerHour = 60;
 
 
-
-
-    public Element createVehicle(Element element, int actualCar, double time, int iTime, int lane){
+    public Element createVehicle(Element element, int actualCar, double time, int iTime, int lane, String type){
         Random rnd = new Random();
         double randomSpeed;
         double speed;
@@ -34,34 +31,64 @@ public class XMLCreator {
         while (randomSpeed>0 || randomSpeed<-5);
 
         speed = randomSpeed + matlabImport.getSpeed(iTime, lane) / 3.6;
+        if (speed<0) speed=0;
         if (speed>36) speed=36;
         element.addAttribute("id", Integer.toString(actualCar))
-                .addAttribute("type", "type1")
+                .addAttribute("type", type)
                 .addAttribute("route", "wholeHighway")
                 .addAttribute("depart", Double.toString(time))
                 .addAttribute("departPos", Double.toString(95))
                 .addAttribute("departSpeed", Double.toString(speed))
                 .addAttribute("departLane",Integer.toString(lane));
-        ;
-
         return element;
 
     }
 
-    public Document createRouteExpDocument() {
+
+    public Element createVType(Element element, int actualCar, String model, int iTime, int lane){
+
+         /* Gipps */
+        NormalDistribution rndAccel = new NormalDistribution(1.7,0.3);
+
+        double randomAccel = rndAccel.sample();
+        double randomDecel = 2.0*randomAccel;
+        double headwayTime = 0.5;
+        double length = 5.0;
+        double maxSpeed = 70.0;
+        element.addAttribute("id","type"+actualCar)
+                .addAttribute("accel", Double.toString(randomAccel))
+                .addAttribute("decel", Double.toString(randomDecel))
+                .addAttribute("sigma", Double.toString(headwayTime))
+                .addAttribute("length", Double.toString(length))
+                .addAttribute("maxSpeed", Double.toString(maxSpeed));
+        // IDM, Krauss, Gipps, Wiedemann
+        if (model.equals("IDM")){
+            Element cfIDM = element.addElement("carFollowing-IDM");
+            cfIDM.addAttribute("delta", Double.toString(4));
+            cfIDM.addAttribute("stepping",Double.toString(1));
+        }
+        else if (model.equals("Gipps")){
+            Element cfGipps = element.addElement("carFollowing-GIPPS");
+            double speed = matlabImport.getSpeed(iTime, lane);
+            NormalDistribution rndDesiredSpeed = new NormalDistribution(36.11,3.6);
+            cfGipps.addAttribute("desiredSpeed", Double.toString(rndDesiredSpeed.sample()));
+        }
+        else if (model.equals("Krauss")){
+            element.addElement("carFollowing-Krauss");
+        }
+        else if (model.equals("Wiedemann")){
+            element.addElement("Wiedemann");
+        }
+        return element;
+    }
+
+
+
+
+
+    public Document createRouteExpDocument(String model) {
         Document document = DocumentHelper.createDocument();
         Element routes = document.addElement( "routes" );
-
-
-        Element vType = routes.addElement( "vType" )
-                .addAttribute( "id" , "type1")
-                .addAttribute("accel", Double.toString(0.8))
-                .addAttribute( "decel", Double.toString(4.5))
-                .addAttribute( "sigma", Double.toString(0.5))
-                .addAttribute( "length", Double.toString(5))
-                .addAttribute( "maxSpeed", Double.toString(70))
-                ;
-
         Element route = routes.addElement( "route" )
                 .addAttribute("id", "wholeHighway")
                 .addAttribute( "color", "1,1,0" )
@@ -105,28 +132,22 @@ public class XMLCreator {
 
         for (int i=0;i< Array.getLength(car);i++)
         {
+            Element vType = routes.addElement( "vType" );
             Element vehicle = routes.addElement("vehicle");
-            System.out.println(car[i].time);
-            vehicle = createVehicle(vehicle,i,car[i].time,car[i].iTime,car[i].lane);
+            vType = createVType(vType,i,model,car[i].iTime,car[i].lane);
+            vehicle = createVehicle(vehicle,i,car[i].time,car[i].iTime,car[i].lane,"type"+i);
         }
-
+        System.out.println("Počet vozidel: "+ matlabImport.getAllCarsInDay());
         return document;
     }
 
 
-    public Document createRouteEqualDocument() {
+
+
+    public Document createRouteEqualDocument(String model) {
         Document document = DocumentHelper.createDocument();
         Element routes = document.addElement( "routes" );
 
-
-        Element vType = routes.addElement( "vType" )
-                .addAttribute( "id" , "type1")
-                .addAttribute("accel", Double.toString(0.8))
-                .addAttribute( "decel", Double.toString(4.5))
-                .addAttribute( "sigma", Double.toString(0.5))
-                .addAttribute( "length", Double.toString(5))
-                .addAttribute( "maxSpeed", Double.toString(70))
-                ;
 
         Element route = routes.addElement( "route" )
                 .addAttribute("id", "wholeHighway")
@@ -158,22 +179,28 @@ public class XMLCreator {
             time1 += delta1;
 
             for (int j = 0; j < (matlabImport.getNumCars(i, 0) + matlabImport.getNumCars(i, 1)); j++) {
+                Element vType = routes.addElement( "vType" );
                 Element vehicle = routes.addElement("vehicle");
                 if (time0 == time1) {
+                    Element vType2 = routes.addElement( "vType" );
                     Element vehicle2 = routes.addElement("vehicle");
-                    vehicle = createVehicle(vehicle, actualCar, time0, i, 0);
+                    vType = createVType(vType, actualCar, model,i,0);
+                    vehicle = createVehicle(vehicle, actualCar, time0, i, 0, "type" + actualCar);
                     actualCar++;
-                    vehicle2 = createVehicle(vehicle2, actualCar, time1, i, 1);
+                    vType2 = createVType(vType2, actualCar, model,i,1);
+                    vehicle2 = createVehicle(vehicle2, actualCar, time1, i, 1, "type" + actualCar);
                     actualCar++;
                     time0 += delta0;
                     time1 += delta1;
                     j++;
                 } else if (time0 < time1) {
-                    vehicle = createVehicle(vehicle, actualCar, time0, i, 0);
+                    vType = createVType(vType, actualCar, model,i,0);
+                    vehicle = createVehicle(vehicle, actualCar, time0, i, 0, "type"+actualCar);
                     time0 += delta0;
                     actualCar++;
                 } else {
-                    vehicle = createVehicle(vehicle, actualCar, time1, i, 1);
+                    vType = createVType(vType, actualCar, model,i,1);
+                    vehicle = createVehicle(vehicle, actualCar, time1, i, 1, "type"+actualCar);
                     time1 += delta1;
                     actualCar++;
                 }
@@ -192,16 +219,16 @@ public class XMLCreator {
 
 
 
-    public XMLCreator(String fileNameMatlab, String fileNameCars,String type){
+    public XMLCreator(String fileNameMatlab, String fileNameCars,String Model, String type){
 
         try {
             matlabImport = new MatlabImport(fileNameMatlab);
             FileWriter outRou = new FileWriter(fileNameCars);
             Document RouteEqualDocument;
-            if (type=="exp")
-                RouteEqualDocument = createRouteExpDocument();
+            if (type.equals("exp"))
+                RouteEqualDocument = createRouteExpDocument(Model);
             else
-                RouteEqualDocument = createRouteEqualDocument();
+                RouteEqualDocument = createRouteEqualDocument(Model);
 
             OutputFormat format = OutputFormat.createPrettyPrint();
             XMLWriter writerRou = new XMLWriter( outRou, format );

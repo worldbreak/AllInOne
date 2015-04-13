@@ -3,9 +3,9 @@
     <output-path>$PROJECT_DIR$/out/artifacts/AllInOne_jar</output-path>
     <root id="archive" name="AllInOne.jar">
       <element id="module-output" name="AllInOne" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/com/jamtio.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/com/dom4j.jar" path-in-jar="/" />
-      <element id="file-copy" path="$PROJECT_DIR$/com/commons-math3-3.4.1.jar" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com/commons-math3-3.4.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/com/jamtio.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
