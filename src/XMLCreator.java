@@ -18,21 +18,21 @@ public class XMLCreator {
     MatlabImport matlabImport;
     boolean poisson = false;
     final int secPerHour = 60;
-
+    double speedHelp;
 
     public Element createVehicle(Element element, int actualCar, double time, int iTime, int lane, String type){
         Random rnd = new Random();
         double randomSpeed;
-        double speed;
         do {
             randomSpeed = rnd.nextGaussian();
 
         }
         while (randomSpeed>0 || randomSpeed<-5);
 
-        speed = randomSpeed + matlabImport.getSpeed(iTime, lane) / 3.6;
+        double speed = randomSpeed + matlabImport.getSpeed(iTime, lane) / 3.6;
+        if (speed > speedHelp) speed = speedHelp;
         if (speed<0) speed=0;
-        if (speed>36) speed=36;
+       // if (speed>36) speed=36;
         element.addAttribute("id", Integer.toString(actualCar))
                 .addAttribute("type", type)
                 .addAttribute("route", "wholeHighway")
@@ -50,34 +50,37 @@ public class XMLCreator {
          /* Gipps */
         NormalDistribution rndAccel = new NormalDistribution(1.7,0.3);
 
-        double randomAccel = rndAccel.sample();
-        double randomDecel = 2.0*randomAccel;
-        double headwayTime = 0.5;
-        double length = 5.0;
-        double maxSpeed = 70.0;
+        double randomAccel = 1.5;//rndAccel.sample();
+        double randomDecel = 5.0; //2.0*randomAccel;
+        double headwayTime = 1.5;
+        double length = 4.25;
+        double minGap = 2;
+        NormalDistribution rndDesiredSpeed = new NormalDistribution(36.11,3.6);
+        double maxSpeed = rndDesiredSpeed.sample();
+
+        speedHelp = maxSpeed;
+
         element.addAttribute("id","type"+actualCar)
                 .addAttribute("accel", Double.toString(randomAccel))
                 .addAttribute("decel", Double.toString(randomDecel))
                 .addAttribute("sigma", Double.toString(headwayTime))
-                .addAttribute("length", Double.toString(length))
-                .addAttribute("maxSpeed", Double.toString(maxSpeed));
+                .addAttribute("minGap", Double.toString(minGap))
+                .addAttribute("length", Double.toString(length));
+        element.addAttribute("maxSpeed", Double.toString(maxSpeed));
+     //          .addAttribute("id","type"+actualCar);
         // IDM, Krauss, Gipps, Wiedemann
         if (model.equals("IDM")){
             Element cfIDM = element.addElement("carFollowing-IDM");
-            cfIDM.addAttribute("delta", Double.toString(4));
-            cfIDM.addAttribute("stepping",Double.toString(1));
         }
         else if (model.equals("Gipps")){
             Element cfGipps = element.addElement("carFollowing-GIPPS");
-            double speed = matlabImport.getSpeed(iTime, lane);
-            NormalDistribution rndDesiredSpeed = new NormalDistribution(36.11,3.6);
-            cfGipps.addAttribute("desiredSpeed", Double.toString(rndDesiredSpeed.sample()));
+            cfGipps.addAttribute("desiredSpeed", Double.toString(maxSpeed));
         }
         else if (model.equals("Krauss")){
             element.addElement("carFollowing-Krauss");
         }
         else if (model.equals("Wiedemann")){
-            element.addElement("Wiedemann");
+            element.addElement("carFollowing-Wiedemann");
         }
         return element;
     }
@@ -92,7 +95,7 @@ public class XMLCreator {
         Element route = routes.addElement( "route" )
                 .addAttribute("id", "wholeHighway")
                 .addAttribute( "color", "1,1,0" )
-                .addAttribute("edges", "7b 8b 9b 10b 11b");
+                .addAttribute("edges", "7b 8b 9b 10b 11b 12b 13b 14b 15b 16b 17b 18b 19b 20b");
 
 
         int actualCar = 0;

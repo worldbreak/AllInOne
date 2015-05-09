@@ -36,6 +36,8 @@ public class XMLReader {
         int carsCount=0;
         Document[] documents = new Document[numberOfFiles];
         double[][] numCars = new double[numberOfFiles][1440];
+        String directory = fileNameOutput.replaceFirst("[.][^.]+$", "");
+        new File(directory).mkdir();
         try {
             for (int h=0;h<numberOfFiles;h++) {
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
@@ -43,10 +45,10 @@ public class XMLReader {
                 now = setStart(now);
                 File f = new File(fileNameInput.replaceFirst("[.][^.]+$", "") + "_" + h + ".xml");
                 documents[h] = parse(f.getName());
-                String FileNameTime = "pocetvozidelpruh_"+h+".txt";
+                String FileNameTime = directory+"/pocetvozidelpruh_"+h+".txt";
                 FileWriter outFileTime = new FileWriter(FileNameTime);
                 PrintWriter outTime = new PrintWriter(outFileTime);
-                FileWriter outFileGNU = new FileWriter("gnuplot_"+h+".txt");
+                FileWriter outFileGNU = new FileWriter(directory+"/gnuplot_"+h+".txt");
                 PrintWriter outGNU = new PrintWriter(outFileGNU);
                 Element root = documents[h].getRootElement();
                 int loop = 0;
@@ -78,37 +80,46 @@ public class XMLReader {
                 outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines");
                 outGNU.close();
                 outFileTime.close();
+                Runtime.getRuntime().exec("gnuplot "+directory+"/gnuplot.txt");
             }
 
-            String FileNameTime = "pocetvozidelpruh.txt";
+            String FileNameTime = directory+"/pocetvozidelpruh.txt";
             FileWriter outFileTime = new FileWriter(FileNameTime);
             PrintWriter outFile = new PrintWriter(outFileTime);
+            String FileNameGEH = directory+"/GEH.txt";
+            FileWriter outFileGEH = new FileWriter(FileNameGEH);
+            PrintWriter outGEH = new PrintWriter(outFileGEH);
             double[] sum = new double[1440];
             Calendar now = Calendar.getInstance();
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-
             now = setStart(now);
-            for(int lane=0;lane<numCars[0].length;lane++)
+            double count=0;
+            for(int time=0;time<numCars[0].length;time++)
             {
 
                 outFile.print(sdf.format(now.getTime())+"    ");
                 for (int f=0;f<numberOfFiles;f++)
                 {
-                    sum[lane] = sum[lane]+numCars[f][lane];
-                    outFile.print(numCars[f][lane]+"    ");
+                    sum[time] = sum[time]+numCars[f][time];
+                    count += numCars[f][time];
+                    outFile.print(numCars[f][time]+"    ");
                 }
-                outFile.print(sum[lane]+"   ");
+                outFile.print(sum[time]+"   ");
                 outFile.println();
+                if ((time+1) % 60 == 0){
+                    outGEH.println(count);
+                    count = 0;
+                }
                 now.add(Calendar.MINUTE, 1);
             }
 
             outFile.close();
-
-            FileWriter outFileGNU = new FileWriter("gnuplot.txt");
+            outGEH.close();
+            FileWriter outFileGNU = new FileWriter(directory+"/gnuplot.txt");
             PrintWriter outGNU = new PrintWriter(outFileGNU);
 
             outGNU.println("set terminal pdf");
-            outGNU.println("set output '"+fileNameOutput);
+            outGNU.println("set output '"+directory+"/"+fileNameOutput);
             outGNU.println("set xlabel 'čas [hod:min]'");
             outGNU.println("set ylabel 'Počet vozidel'");
             outGNU.println("set xdata time");

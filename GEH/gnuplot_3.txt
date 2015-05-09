@@ -1,0 +1,6 @@
+set terminal pdf
+set output 'GEH_3.pdf
+set xrange [0:1440]
+set yrange [0:60]
+set xlabel 'čas [min]'
+plot 'GEH/pocetvozidelpruh_3.txt' using 1:2 with lines

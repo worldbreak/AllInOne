@@ -1,0 +1,9 @@
+set terminal pdf
+set output 'GEH/GEH.pdf
+set xlabel 'čas [hod:min]'
+set ylabel 'Počet vozidel'
+set xdata time
+set timefmt '%H:%M'
+set format x '%H:%M'
+set yrange [0:60]
+plot 'GEH/pocetvozidelpruh.txt' using 1:2 with lines title 'pruh0', 'GEH/pocetvozidelpruh.txt' using 1:3 with lines title 'pruh1', 'GEH/pocetvozidelpruh.txt' using 1:4 with lines title 'pruh2', 'GEH/pocetvozidelpruh.txt' using 1:5 with lines title 'pruh3', 'GEH/pocetvozidelpruh.txt' using 1:6 with lines title 'součet'
