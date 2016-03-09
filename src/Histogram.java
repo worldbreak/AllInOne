@@ -40,11 +40,13 @@ public class Histogram {
         return hoursInMins + mins;
     }
 
-    public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles,String from, String to) throws DocumentException {
+    public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles,String from, String to,String language) throws DocumentException {
         Document[] documents = new Document[numberOfFiles];
         int fromInt = toMins(from);
         int toInt = toMins(to);
         int sizeOfArray = 1440;
+        String directory = fileNameOutput.replaceFirst("[.][^.]+$", "");
+        new File(directory).mkdir();
         if (to!="-1")
         {
             if (fromInt<toInt)
@@ -142,7 +144,7 @@ public class Histogram {
                         freq[(int)sumCars[i]]++;
                 }
             }
-            FileWriter outFileFreq = new FileWriter("cetnosti.txt");
+            FileWriter outFileFreq = new FileWriter(directory+"/cetnosti.txt");
             PrintWriter outFreq = new PrintWriter(outFileFreq);
 
             for (int i=0;i<Array.getLength(freq);i++)
@@ -150,28 +152,33 @@ public class Histogram {
 
             outFreq.close();
 
-            FileWriter outFileGNU = new FileWriter("gnuPlotCetnosti.txt");
+            FileWriter outFileGNU = new FileWriter(directory+"/gnuPlot.txt");
             PrintWriter outGNU = new PrintWriter(outFileGNU);
 
 
 
             outGNU.println("set terminal pdf");
-            outGNU.println("set output '"+fileNameOutput+"'");
-            outGNU.println("set ylabel 'Četnost'");
-            outGNU.println("set xlabel 'Počet vozidel'");
+            outGNU.println("set output '"+directory+"/"+fileNameOutput+"'");
+            if (language=="cs") {
+                outGNU.println("set ylabel 'Četnost'");
+                outGNU.println("set xlabel 'Počet vozidel'");
+            } else {
+                outGNU.println("set ylabel 'Frequency'");
+                outGNU.println("set xlabel 'Number of Cars'");
+            }
             outGNU.println("set xrange [0:"+Array.getLength(freq)+"]");
             outGNU.println("set yrange [0:"+max(freq)+"]");
             outGNU.println("set style fill transparent solid 0.5 noborder");
-            outGNU.print("plot 'cetnosti.txt' u 1:2 w boxes lc rgb\"green\" notitle");
+            outGNU.print("plot '"+directory+"/cetnosti.txt' u 1:2 w boxes lc rgb\"green\" notitle");
             outGNU.close();
-
+            Runtime.getRuntime().exec("gnuplot "+directory+"/gnuplot.txt");
         } catch (Exception e) {
             System.out.println(e);
         }
 
     }
 
-    public Histogram(String fileNameInput, String fileNameOutput,String from, String to) throws DocumentException {
+    public Histogram(String fileNameInput, String fileNameOutput,String from, String to, String language) throws DocumentException {
         int numberOfFiles=0;
         for (int i=0; i<4;i++)
         {
@@ -179,7 +186,7 @@ public class Histogram {
             if (f.exists())
                 numberOfFiles++;
         }
-        hist(fileNameInput,fileNameOutput,numberOfFiles,from,to);
+        hist(fileNameInput,fileNameOutput,numberOfFiles,from,to,language);
 
 /*           Document document = parse(fileNameInput);
            bar(document, fileNameOutput);*/

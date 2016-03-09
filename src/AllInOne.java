@@ -112,13 +112,19 @@ public class AllInOne {
             if (arg.equals("-x")) {
                 if(Array.getLength(args)>(i+2)) {
                     if (args[i+1].endsWith(".xml")) {
-                        if (args[i+2].endsWith(".pdf")){
-                            try
-                            {
-                                new XMLReader(args[i+1],args[i+2]);
-                            } catch (DocumentException e)
-                            {
-                                System.out.println(e);
+                        if (args[i+2].endsWith(".pdf")) {
+                            if (Array.getLength(args) > (i + 3)) {
+                                try {
+                                    new XMLReader(args[i + 1], args[i + 2], args[i + 3]);
+                                } catch (DocumentException e) {
+                                    System.out.println(e);
+                                }
+                            } else {
+                                try {
+                                    new XMLReader(args[i + 1], args[i + 2], "cs");
+                                } catch (DocumentException e) {
+                                    System.out.println(e);
+                                }
                             }
                         }else{
                             System.out.println("Musíte zadat název výstupního souboru (přípona .pdf)");
@@ -141,12 +147,13 @@ public class AllInOne {
                                 if(Array.getLength(args)>(i+3))
                                 {
                                     if (isInteger(args[i + 3]))
-                                        new XMLReaderHist(args[i + 1], args[i + 2], args[i + 3]);
+                                        if(Array.getLength(args)>(i+4))
+                                            new XMLReaderHist(args[i + 1], args[i + 2], args[i + 3], args[i + 4]);
                                     else
-                                        new XMLReaderHist(args[i+1],args[i+2],"-1");
+                                        new XMLReaderHist(args[i+1],args[i+2],"-1",args[i + 4]);
                                 }
                                 else
-                                    new XMLReaderHist(args[i+1],args[i+2],"-1");
+                                    new XMLReaderHist(args[i+1],args[i+2],"-1","cs");
                             } catch (DocumentException e) {
                                 System.out.println(e);
                             }
@@ -170,10 +177,16 @@ public class AllInOne {
                             try {
                                 if(Array.getLength(args)>(i+4))
                                 {
-                                    new Histogram(args[i+1],args[i+2],args[i+3],args[i+4]);
+                                    if(Array.getLength(args)>(i+5))
+                                        new Histogram(args[i+1],args[i+2],args[i+3],args[i+4],args[i+5]);
+                                    else
+                                        new Histogram(args[i+1],args[i+2],args[i+3],args[i+4],"cs");
                                 }
                                 else
-                                    new Histogram(args[i+1],args[i+2],"-1","-1");
+                                    if(Array.getLength(args)>(i+3))
+                                        new Histogram(args[i+1],args[i+2],"-1","-1",args[i+3]);
+                                    else
+                                        new Histogram(args[i+1],args[i+2],"-1","-1","cs");
                             } catch (DocumentException e) {
                                 System.out.println(e);
                             }

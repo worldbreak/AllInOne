@@ -1,9 +1,8 @@
 set terminal pdf
-set output 'GEH.pdf
-set xlabel 'čas [hod:min]'
-set ylabel 'Počet vozidel'
-set xdata time
-set timefmt '%H:%M'
-set format x '%H:%M'
-set yrange [0:60]
-plot 'pocetvozidelpruh.txt' using 1:2 with lines title 'pruh0', 'pocetvozidelpruh.txt' using 1:3 with lines title 'pruh1', 'pocetvozidelpruh.txt' using 1:4 with lines title 'pruh2', 'pocetvozidelpruh.txt' using 1:5 with lines title 'pruh3', 'pocetvozidelpruh.txt' using 1:6 with lines title 'součet'
+set output 'vystupcestnosti.pdf'
+set ylabel 'Četnost'
+set xlabel 'Počet vozidel'
+set xrange [0:7]
+set yrange [0:74.0]
+set style fill transparent solid 0.5 noborder
+plot 'cetnosti.txt' u 1:2 w boxes lc rgb"green" notitle

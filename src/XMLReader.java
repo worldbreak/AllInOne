@@ -32,7 +32,7 @@ public class XMLReader {
     }
 
 
-    public static void timeSeries(String fileNameInput,String fileNameOutput,int numberOfFiles) throws DocumentException {
+    public static void timeSeries(String fileNameInput,String fileNameOutput,int numberOfFiles, String language) throws DocumentException {
         int carsCount=0;
         Document[] documents = new Document[numberOfFiles];
         double[][] numCars = new double[numberOfFiles][1440];
@@ -80,12 +80,15 @@ public class XMLReader {
                 outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines");
                 outGNU.close();
                 outFileTime.close();
-                Runtime.getRuntime().exec("gnuplot "+directory+"/gnuplot.txt");
+
             }
 
             String FileNameTime = directory+"/pocetvozidelpruh.txt";
+            String FileNameTotalCount = directory+"/pocetcelkem.txt";
             FileWriter outFileTime = new FileWriter(FileNameTime);
+            FileWriter outFileTotalCount = new FileWriter(FileNameTotalCount);
             PrintWriter outFile = new PrintWriter(outFileTime);
+            PrintWriter outFileTC = new PrintWriter(outFileTotalCount);
             String FileNameGEH = directory+"/GEH.txt";
             FileWriter outFileGEH = new FileWriter(FileNameGEH);
             PrintWriter outGEH = new PrintWriter(outFileGEH);
@@ -106,6 +109,7 @@ public class XMLReader {
                 }
                 outFile.print(sum[time]+"   ");
                 outFile.println();
+                outFileTC.println(sum[time]);
                 if ((time+1) % 60 == 0){
                     outGEH.println(count);
                     count = 0;
@@ -114,14 +118,21 @@ public class XMLReader {
             }
 
             outFile.close();
+            outFileTC.close();
             outGEH.close();
             FileWriter outFileGNU = new FileWriter(directory+"/gnuplot.txt");
             PrintWriter outGNU = new PrintWriter(outFileGNU);
-
             outGNU.println("set terminal pdf");
             outGNU.println("set output '"+directory+"/"+fileNameOutput);
-            outGNU.println("set xlabel 'čas [hod:min]'");
-            outGNU.println("set ylabel 'Počet vozidel'");
+
+            if (language=="cs") {
+                outGNU.println("set xlabel 'čas [hod:min]'");
+                outGNU.println("set ylabel 'Počet vozidel'");
+            }
+            else {
+                outGNU.println("set xlabel 'time [h:min]'");
+                outGNU.println("set ylabel 'Number of cars'");
+            }
             outGNU.println("set xdata time");
             outGNU.println("set timefmt '%H:%M'");
             outGNU.println("set format x '%H:%M'");
@@ -131,19 +142,26 @@ public class XMLReader {
                 int column = c + 2;
                 int lane = c + 1;
                 if (c!=numberOfFiles)
-                    outGNU.print("'" + FileNameTime + "' using 1:" + column +" with lines title 'pruh"+c+"', ");
+                    if (language=="cs")
+                        outGNU.print("'" + FileNameTime + "' using 1:" + column +" with lines title 'pruh "+c+"', ");
+                    else
+                        outGNU.print("'" + FileNameTime + "' using 1:" + column +" with lines title 'lane "+c+"', ");
                 else
-                    outGNU.println("'" + FileNameTime + "' using 1:" + column +" with lines title 'součet'");
+                    if (language=="cs")
+                        outGNU.println("'" + FileNameTime + "' using 1:" + column +" with lines title 'součet'");
+                    else
+                        outGNU.println("'" + FileNameTime + "' using 1:" + column +" with lines title 'sum'");
             }
       //      outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines, '"+FileNameTime+"' using 1:3 with lines, '"+FileNameTime+"'using 1:4 with lines, '"+FileNameTime+"' using 1:5 with lines");
             outGNU.close();
+            Runtime.getRuntime().exec("gnuplot "+directory+"/gnuplot.txt");
         } catch (Exception e) {
             System.out.println(e);
         }
 
     }
 
-    public XMLReader(String fileNameInput, String fileNameOutput) throws DocumentException {
+    public XMLReader(String fileNameInput, String fileNameOutput,String language) throws DocumentException {
         int numberOfFiles=0;
         for (int i=0; i<4;i++)
         {
@@ -151,7 +169,7 @@ public class XMLReader {
             if (f.exists())
                 numberOfFiles++;
         }
-        timeSeries(fileNameInput,fileNameOutput,numberOfFiles);
+        timeSeries(fileNameInput,fileNameOutput,numberOfFiles, language);
 
 /*           Document document = parse(fileNameInput);
            bar(document, fileNameOutput);*/

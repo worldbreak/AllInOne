@@ -41,7 +41,7 @@ public class XMLReaderHist {
     }
 
 
-    public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles, String w) throws DocumentException {
+    public static void hist(String fileNameInput,String fileNameOutput,int numberOfFiles, String w, String language) throws DocumentException {
         Document[] documents = new Document[numberOfFiles];
         int window = Integer.parseInt(w);
         int sizeOfArray = 0;
@@ -54,6 +54,8 @@ public class XMLReaderHist {
             sizeOfArray = (int) (1440 / window);
             increaser = window;
         }
+        String directory = fileNameOutput.replaceFirst("[.][^.]+$", "");
+        new File(directory).mkdir();
 
         double[][] numCars = new double[numberOfFiles][sizeOfArray];
 
@@ -78,7 +80,7 @@ public class XMLReaderHist {
                 }
             }
 
-            String FileNameTime = "pocetvozidelhist.txt";
+            String FileNameTime = directory+"/pocetvozidelhist.txt";
             FileWriter outFileTime = new FileWriter(FileNameTime);
             PrintWriter outFile = new PrintWriter(outFileTime);
             double[] sum = new double[sizeOfArray];
@@ -102,30 +104,45 @@ public class XMLReaderHist {
 
             outFile.close();
 
-            FileWriter outFileGNU = new FileWriter("gnuplot.txt");
+            FileWriter outFileGNU = new FileWriter(directory+"/gnuplot.txt");
             PrintWriter outGNU = new PrintWriter(outFileGNU);
 
             outGNU.println("set terminal pdf");
-            outGNU.println("set output '"+fileNameOutput+"'");
+            outGNU.println("set output '"+directory+"/"+fileNameOutput+"'");
 
             outGNU.println("set style fill solid 1.00 border -1");
             outGNU.println("set style histogram rowstacked");
             outGNU.println("set style data histograms");
-
+            outGNU.println("set xrange [0:"+sizeOfArray+"]");
             outGNU.println("set ytics out nomirror");
             outGNU.println("set style fill solid border -1");
             outGNU.println("set boxwidth 0.5 relative");
-            outGNU.println("set ylabel 'Počet vozidel'");
-            outGNU.println("set xlabel 'Čas'");
+            if (language == "cs") {
+                outGNU.println("set ylabel 'Počet vozidel'");
+                outGNU.println("set xlabel 'Čas'");
+            } else {
+                outGNU.println("set ylabel 'Number of cars'");
+                outGNU.println("set xlabel 'Time'");
+            }
+
             outGNU.println("set style fill transparent solid 0.5 noborder");
-            outGNU.print("plot 'pocetvozidelhist.txt' using 2:xtic(strcol(1)) title 'počet vozidel - 0. pruh', ");
+            if (language == "cs")
+                outGNU.print("plot '"+directory+"/pocetvozidelhist.txt' using 2:xtic(strcol(1)) title 'Počet vozidel - 0. pruh', ");
+            else
+                outGNU.print("plot '"+directory+"/pocetvozidelhist.txt' using 2:xtic(strcol(1)) title 'Number of cars - 0. lane', ");
 
             for (int c=1;c<numberOfFiles;c++) {
                 int column=c+3;
                 if (c!=numberOfFiles)
-                    outGNU.print("'" + FileNameTime + "' using " + column +" title 'počet vozidel - "+c+". pruh', ");
+                    if (language == "cs")
+                        outGNU.print("'" + FileNameTime + "' using " + column +" title 'Počet vozidel - "+c+". pruh', ");
+                    else
+                        outGNU.print("'" + FileNameTime + "' using " + column +" title 'Number of cars - "+c+". lane', ");
                 else
-                    outGNU.println("'" + FileNameTime + "' using " + column +" title 'počet vozidel - "+c+". pruh'");
+                    if (language == "cs")
+                        outGNU.println("'" + FileNameTime + "' using " + column +" title 'Počet vozidel - "+c+". pruh'");
+                    else
+                        outGNU.println("'" + FileNameTime + "' using " + column +" title 'Number of cars - "+c+". lane'");
             }
          //   outGNU.print("plot 'pocetvozidelhist.txt' using 2:xtic(strcol(1)) lc rgb 'green',  'pocetvozidelhist.txt' using 3 lc rgb 'red', 'pocetvozidelhist.txt' using 4 lc rgb 'yellow'");
             //using 2:xticlabels(1) lc rgb 'green'
@@ -139,13 +156,14 @@ public class XMLReaderHist {
             } */
       //      outGNU.println("plot '"+FileNameTime+"' using 1:2 with lines, '"+FileNameTime+"' using 1:3 with lines, '"+FileNameTime+"'using 1:4 with lines, '"+FileNameTime+"' using 1:5 with lines");
             outGNU.close();
+            Runtime.getRuntime().exec("gnuplot "+directory+"/gnuplot.txt");
         } catch (Exception e) {
             System.out.println(e);
         }
 
     }
 
-    public XMLReaderHist(String fileNameInput, String fileNameOutput,String w) throws DocumentException {
+    public XMLReaderHist(String fileNameInput, String fileNameOutput,String w, String language) throws DocumentException {
         int numberOfFiles=0;
         for (int i=0; i<4;i++)
         {
@@ -153,7 +171,7 @@ public class XMLReaderHist {
             if (f.exists())
                 numberOfFiles++;
         }
-        hist(fileNameInput,fileNameOutput,numberOfFiles,w);
+        hist(fileNameInput,fileNameOutput,numberOfFiles,w,language);
 
 /*           Document document = parse(fileNameInput);
            bar(document, fileNameOutput);*/
